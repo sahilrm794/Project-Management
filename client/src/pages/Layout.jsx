@@ -27,7 +27,7 @@ const Layout = () => {
     if (isLoaded && user && workspaces.length === 0) {
       dispatch(fetchWorkspaces({ getToken }));
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, workspaces.length]);
 
   // Wait for Clerk to finish loading session
   if (!isLoaded) {
@@ -48,7 +48,7 @@ const Layout = () => {
   }
 
   // Signed in but still no workspaces: show CreateOrganization
-  if (user && workspaces.length === 0 ) {
+  if (user && workspaces.length === 0 && !loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <CreateOrganization />
