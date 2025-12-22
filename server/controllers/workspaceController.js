@@ -80,9 +80,9 @@ export const addMember = async (req, res) => {
       }
     });
 
-    res.json({ member, message: "Member Added Successfully" });
+    return res.status(200).json({ member, message: "Member Added Successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error.code || error.message });
+    return res.status(500).json({ message: error.code || error.message });
   }
 };
