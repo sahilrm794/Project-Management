@@ -6,14 +6,16 @@ import Projects from "./pages/Projects";
 import Team from "./pages/Team";
 import ProjectDetails from "./pages/ProjectDetails";
 import TaskDetails from "./pages/TaskDetails";
+import Landing from "./pages/Landing";
 
 const App = () => {
     return (
         <>
             <Toaster />
             <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Dashboard />} />
+                <Route path="/" element={<Landing />} />
+                <Route element={<Layout />}>
+                    <Route path="dashboard" element={<Dashboard />} />
                     <Route path="team" element={<Team />} />
                     <Route path="projects" element={<Projects />} />
                     <Route path="projectsDetail" element={<ProjectDetails />} />
