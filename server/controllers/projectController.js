@@ -83,7 +83,7 @@ export const createProject = async (req, res) => {
 export const updateProject = async (req, res) => {
     try {
         const {userId} =  await req.auth();
-        const {workspaceId, description, name, status, start_date, end_date, team_members, team_lead, progress, priority} = req.body;
+        const {id, workspaceId, description, name, status, start_date, end_date, team_members, team_lead, progress, priority} = req.body;
 
         //check if user has admin role for workspace
         const workspace = await prisma.workspace.findUnique({
@@ -96,13 +96,13 @@ export const updateProject = async (req, res) => {
         }
 
         if(!workspace.members.some((member)=>member.userId === userId && member.role === "ADMIN")){
-            const project = await prisma.project.findUnique({
+            const existingProject = await prisma.project.findUnique({
                 where: {id}
             })
 
-            if(!project){
+            if(!existingProject){
                 return res.status(404).json({ message: "Project not found"})
-            }else if(project.team_lead != userId){
+            }else if(existingProject.team_lead != userId){
                 return res.status(403).json({ message: "You dont have permission to update the project"})
             }
         }
@@ -147,7 +147,7 @@ export const addMember = async (req, res) => {
             return res.status(400).json({message:"Only team lead can add members"})
         }
 
-        const existingMember = project.members.find((m)=>m.email===email)
+        const existingMember = project.members.find((m)=>m.user.email===email)
         if(existingMember){
             return res.status(400).json({message:"User is already a member"})
         }

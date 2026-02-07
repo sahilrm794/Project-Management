@@ -11,7 +11,7 @@ export const addComment = async (req,res) => {
         })
     
         const project = await prisma.project.findUnique({
-            where: {id:taskId.projectId},
+            where: {id:task.projectId},
             include: {members: {include: {user: true}}}
         })
     
@@ -44,7 +44,7 @@ export const getTaskComments = async (req,res) => {
     try {
         const {taskId} = req.params
         const comments = await prisma.comment.findMany({
-            where: {id:taskId}, include: {user:true}
+            where: {taskId}, include: {user:true}
         })
 
         return res.status(200).json({comments,message:"Comments fetched Successfully"})

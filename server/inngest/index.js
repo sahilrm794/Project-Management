@@ -209,7 +209,7 @@ const sendTaskAssignmentEmail = inngest.createFunction(
 
       await step.run('check-if-task-is-pending',async () => {
         const task =await prisma.task.findUnique({
-          wher: {id:taskId},
+          where: {id:taskId},
           include: {assignee:true, project:true}
         })
 

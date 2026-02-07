@@ -3,7 +3,7 @@ import { inngest } from "../inngest/index.js";
 
     export const createTask = async (req,res) => {
         try {
-            const {userId} = req.auth()
+            const {userId} = await req.auth()
             const {projectId,description,type,title,status,priority,assigneeId,due_date} = req.body
             const origin = req.get('origin')
              
@@ -45,7 +45,7 @@ import { inngest } from "../inngest/index.js";
                 }
             })
 
-            return res.status(200).json({message: "Task created successfully"})
+            return res.status(200).json({task: taskwithAssignee, message: "Task created successfully"})
 
         } catch (error) {
             console.log(error)
@@ -63,9 +63,9 @@ import { inngest } from "../inngest/index.js";
             if(!task){
                 return res.status(400).json({message: "Task not found"})
             }
-            const {userId} = req.auth()
+            const {userId} = await req.auth()
 
-             
+
             const project = await prisma.project.findUnique({
                 where: {id: task.projectId},
                 include: {members: {include: {user:true}}}
@@ -82,7 +82,12 @@ import { inngest } from "../inngest/index.js";
                 data: req.body
             })
 
-            return res.status(200).json({message: "Task updated successfully"})
+            const taskWithAssignee = await prisma.task.findUnique({
+                where: {id: req.params.id},
+                include: {assignee: true}
+            })
+
+            return res.status(200).json({task: taskWithAssignee, message: "Task updated successfully"})
 
         } catch (error) {
             console.log(error)
@@ -92,9 +97,9 @@ import { inngest } from "../inngest/index.js";
 
     export const deleteTask = async (req,res) => {
         try {
-            const {userId} = req.auth()
+            const {userId} = await req.auth()
             const {taskIds} = req.body
-            const tasks = await prisma.task.findUnique({
+            const tasks = await prisma.task.findMany({
                 where: {id: {in: taskIds}}
             })
 
