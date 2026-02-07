@@ -48,7 +48,7 @@ const Layout = () => {
   }, [hasFetched, workspaces.length, hasClerkOrgs, loading]);
 
   // Wait for Clerk to finish loading session
-  if (!isLoaded || !isOrgListLoaded) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950">
         <Loader2Icon className="w-7 h-7 animate-spin" />
@@ -65,8 +65,17 @@ const Layout = () => {
     );
   }
 
+  // Wait for org list to load (only for signed-in users)
+  if (!isOrgListLoaded) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950">
+        <Loader2Icon className="w-7 h-7 animate-spin" />
+      </div>
+    );
+  }
+
   // Still loading workspaces or waiting for Inngest sync
-  if (loading || !hasFetched || (workspaces.length === 0 && hasClerkOrgs)) {
+  if (!hasFetched || (workspaces.length === 0 && hasClerkOrgs)) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-zinc-950 gap-3">
         <Loader2Icon className="w-7 h-7 animate-spin" />
