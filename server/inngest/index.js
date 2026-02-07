@@ -107,21 +107,30 @@ const syncWorkspaceDeletion = inngest.createFunction(
   }
 );
 
-// Inngest function to save workspace member data to db
-// const syncWorkspaceMemberCreation = inngest.createFunction(
-//   { id: "sync-workspace-member-from-clerk" },
-//   { event: "clerk/organizationInvitation.accepted" },
-//   async ({ event }) => {
-//     const { data } = event;
-//     await prisma.workspaceMember.create({
-//       data: {
-//         userId: data.user_id,
-//         workspaceId: data.organization_id, 
-//         role: String(data.role_name || "MEMBER").toUpperCase(),
-//       },
-//     });
-//   }
-// );
+// Inngest function to sync workspace member when someone joins an organization
+const syncWorkspaceMemberCreation = inngest.createFunction(
+  { id: "sync-workspace-member-from-clerk" },
+  { event: "clerk/organizationMembership.created" },
+  async ({ event }) => {
+    const { data } = event;
+    const userId = data.public_user_data?.user_id;
+    const workspaceId = data.organization?.id;
+    if (!userId || !workspaceId) return;
+
+    // Check if member already exists (creator is added in syncWorkspaceCreation)
+    const existing = await prisma.workspaceMember.findUnique({
+      where: { userId_workspaceId: { userId, workspaceId } },
+    });
+    if (existing) return;
+
+    const clerkRole = String(data.role || "").toLowerCase();
+    const role = clerkRole.includes("admin") ? "ADMIN" : "MEMBER";
+
+    await prisma.workspaceMember.create({
+      data: { userId, workspaceId, role },
+    });
+  }
+);
 
 const sendTaskAssignmentEmail = inngest.createFunction(
   {id: "send-task-assignment-email"},
@@ -306,6 +315,6 @@ export const functions = [
   syncWorkspaceCreation,
   syncWorkspaceDeletion,
   syncWorkspaceUpdation,
-  // syncWorkspaceMemberCreation,
+  syncWorkspaceMemberCreation,
   sendTaskAssignmentEmail
 ];
